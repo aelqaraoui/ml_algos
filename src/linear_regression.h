@@ -7,16 +7,14 @@
 #include <math.h>
 #include <string.h>
 
-#include "model.h"
-
-void init_model(int d, int n_, int type_);
+#include "util.h"
 
 void graph();
 
-void gradient_descent(float alpha, float** x, float* y);
+void gradient_descent_linear(REAL alpha, REAL** x, REAL* y);
 
 void load_data(char* path);
 
-void train(float alpha, int tmax_);
+void train(REAL alpha, int tmax_);
 
 #endif //LINEAR_REGRESSION_H

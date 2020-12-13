@@ -1,21 +1,25 @@
 #include "model.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 
-float dot(float* a, float* b, int d)
-{
-    float result = 0;
-    for(int i = 0; i < d; i++)
-    {
-        result += a[i]*b[i];
-    }
-    return result;
-}
+#include "util.h"
 
-float MSE(float** x, float* y, int m)
+void init_model(int d, int n_)
 {
-    float result = 0;
-    for(int i = 0; i < m; i++)
+    dim = d;
+    n = n_;
+    x = (REAL**)malloc(n*sizeof(REAL*));
+    y = (REAL*)malloc(n*sizeof(REAL));
+    w = (REAL*)malloc((dim+1)*sizeof(REAL));
+    for(int i = 0; i < n; i++)
     {
-        result += pow(dot(w, x[i], dim+1) - y[i], 2);
+        x[i] = (REAL*)malloc((dim+1)*sizeof(REAL));
     }
-    return result/(float)m;
+    for(int i = 0; i < dim+1; i++)
+    {
+        w[i] = (REAL)rand()/(REAL)RAND_MAX;
+    }
+    
 }

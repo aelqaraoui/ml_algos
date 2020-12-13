@@ -1,21 +1,14 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "linear_regression.h"
+void init_model(int d, int n_);
 
-#define LINEAR_REG 0
-#define LOGISTIC_REG 1
+#ifdef LINEAR_REG
+    #include "linear_regression.h"
+#endif
 
-int n;
-int dim;
-int type;
-
-float** x;
-float* y;
-float* w;
-
-float dot(float* a, float* b, int d);
-
-float MSE(float** x, float* y, int m);
+#ifdef LOGISTIC_REG
+    #include "logistic_regression.h"
+#endif
 
 #endif //MODEL_H

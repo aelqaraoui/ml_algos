@@ -1,24 +1,5 @@
 #include "linear_regression.h"
 
-void init_model(int d, int n_, int type_)
-{
-    dim = d;
-    n = n_;
-    type = type_;
-    x = (float**)malloc(n*sizeof(float*));
-    y = (float*)malloc(n*sizeof(float));
-    w = (float*)malloc((dim+1)*sizeof(float));
-    for(int i = 0; i < n; i++)
-    {
-        x[i] = (float*)malloc((dim+1)*sizeof(float));
-    }
-    for(int i = 0; i < dim+1; i++)
-    {
-        w[i] = (float)rand()/(float)RAND_MAX;
-    }
-    
-}
-
 void graph()
 {
     FILE* fptr;
@@ -28,9 +9,9 @@ void graph()
     }
     for(int i = 0; i < n; i++)
     {
-        float xpl = x[i][0];
-        float ypl = y[i];
-        fprintf(fptr, "%f %f\n", xpl, ypl);
+        REAL xpl = x[i][0];
+        REAL ypl = y[i];
+        fprintf(fptr, "%f %f\n", (double)xpl, (double)ypl);
     }
     fclose(fptr);
 
@@ -39,33 +20,31 @@ void graph()
     {
         printf("Error\n");
     }
-    fprintf(fptr1, "%f %f\n%f %f\n", 0.0f, w[dim], 1.0f, w[0]+w[dim]);
+    fprintf(fptr1, "%f %f\n%f %f\n", 0.0f, (double)w[dim], 1.0f, (double)(w[0]+w[dim]));
     fclose(fptr1);
 
     char command[1024] = "gnuplot -e \"set terminal png size 400,300; set output 'points.png'; plot 'res/points.dat' with points notitle, 'res/line.dat' with lines notitle";
     char command2[256];
-    sprintf(command2, ", (%f)*x + (%f) notitle\"", w[0], w[dim]);
+    sprintf(command2, ", (%f)*x + (%f) notitle\"", (double)w[0], (double)w[dim]);
     strcat(command, command2);
     system(command);
     system("gnuplot -e \"set terminal png size 400, 300; set output 'loss.png'; set style line 100; plot 'res/loss.dat' with lines lw 2 notitle\"");
 
 }
 
-void gradient_descent(float alpha, float** x, float* y)
+void gradient_descent_linear(REAL alpha, REAL** x, REAL* y)
 {
-    float* wpl = (float*)malloc((dim+1)*sizeof(float));
+    REAL* wpl = (REAL*)malloc((dim+1)*sizeof(REAL));
     for(int j = 0; j < dim+1; j++)
     {
-        if(type == LINEAR_REG)
+        REAL sum = 0;
+        for(int i = 0; i < n; i++)
         {
-            float sum = 0;
-            for(int i = 0; i < n; i++)
-            {
-                sum += (dot(w, x[i], dim+1) - y[i]) * x[i][j];
-            }
-
-            wpl[j] = w[j] - alpha * (2.0/(float)n) * sum;
+            sum += (dot(w, x[i], dim+1) - y[i]) * x[i][j];
         }
+
+        wpl[j] = w[j] - alpha * (2.0/(REAL)n) * sum;
+        
     }
     free(w);
     w = wpl;
@@ -88,20 +67,22 @@ void load_data(char* path)
         getline(&line, &len, cars); 
         line[strcspn(line, "\n")] = 0;
         char* save;
-        x[i][0] = (float)atoi(strtok_r(line, ",", &save));
+        x[i][0] = (REAL)atof(strtok_r(line, ",", &save));
         for(int j = 1; j < dim; j++)
         {
-            x[i][j] = (float)atoi(strtok_r(NULL, ",", &save));
+            x[i][j] = atof(strtok_r(NULL, ",", &save));
         }
         x[i][dim] = 1.0f;
-        y[i] = (float)atoi(strtok_r(NULL, ",", &save));
+        y[i] = atof(strtok_r(NULL, ",", &save));
     }
 }
 
-void train(float alpha, int tmax_)
+void train(REAL alpha, int tmax_)
 {
-    float loss = MSE(x, y, n);
-    printf("loss=%f w=(%f, %f)\n", loss, w[0], w[1]);
+    REAL loss = MSE(x, y, n);
+    printf("loss=%f w=(", (double)loss);
+    for(int i = 0; i < dim; i++)  printf("%f,", (double)w[i]);
+    printf("%f)\n", (double)w[dim]);
 
     FILE* floss;
     if(!(floss = fopen("res/loss.dat", "w")))
@@ -109,15 +90,19 @@ void train(float alpha, int tmax_)
         printf("Error writing loss data.\n");
     }
     int tmax = 0;
-    fprintf(floss, "%f %f\n", (float)tmax/(float)tmax_, loss);
+    fprintf(floss, "%f %f\n", (double)((REAL)tmax/(REAL)tmax_), (double)loss);
     while(loss > 0.0000001f && tmax < tmax_)
     {
-        fprintf(floss, "%f %f\n", (float)tmax/50000.0, loss);
-        gradient_descent(alpha, x, y);
-        printf("loss=%f w=(%f, %f)\n", loss, w[0], w[1]);
+        fprintf(floss, "%f %f\n", (double)((REAL)tmax/tmax_), (double)loss);
+        gradient_descent_linear(alpha, x, y);
+        printf("loss=%f w=(", (double)loss);
+        for(int i = 0; i < dim; i++)  printf("%f,", (double)w[i]);
+        printf("%f)\n", (double)w[dim]);
         loss = MSE(x, y, n);
         tmax++;
     }
-    printf("loss=%f w=(%f, %f)\n", loss, w[0], w[1]);
+    printf("loss=%f w=(", (double)loss);
+    for(int i = 0; i < dim; i++)  printf("%f,", (double)w[i]);
+    printf("%f)\n", (double)w[dim]);
     fclose(floss);
 }
