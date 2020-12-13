@@ -1,11 +1,9 @@
-#include <stdio.h>
 #define LINEAR_REG
 #include "model.h"
 
 int main()
 {
     //Initializing model
-    printf("Hello");
     init_model(1, 50);
 
     //Loading training data
